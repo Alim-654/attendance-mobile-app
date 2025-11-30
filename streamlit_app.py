@@ -316,7 +316,8 @@ def get_attendance_for_date(target_date):
             data[col] = data[col].map(code_to_name).fillna(data[col])
 
     
-
+  ###############################
+  #General shift logic
 
 
         # Replace codes → names for all columns except Date
@@ -558,7 +559,7 @@ st.markdown("""
 #         label_visibility="collapsed"
 #     )
 
-with st.expander("🗓️ **CHOOSE A WEEKLY ATTENDANCE**", expanded=not st.session_state.expander_collapsed):
+with st.expander("🗓️ **CHOOSE WEEKLY ATTENDANCE**", expanded=not st.session_state.expander_collapsed):
     week_option = st.selectbox(
         "",
         ["-- Select a Week --", "This Week", "Next Week", "Last Week"],
@@ -593,7 +594,7 @@ if week_option == "-- Select a Week --":
 
 # Only show report if a real week is selected
 if week_option != "-- Select a Week --":
-    today = datetime.date.today()
+    ##today = datetime.date.today()
 
     if week_option == "This Week":
         monday = today - datetime.timedelta(days=today.weekday())

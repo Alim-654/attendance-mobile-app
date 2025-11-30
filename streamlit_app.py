@@ -170,8 +170,8 @@ except Exception:
 #creds = Credentials.from_service_account_file("attendance-app-479515-a2c99015276e.json", scopes=scope)
 #creds = Credentials.from_service_account_info(st.secrets["google"], scopes=scope)
 client = gspread.authorize(creds)
-sheet = client.open("AppTester").sheet1
-#sheet = client.open("MLP ONENOC DUTYCHART").sheet1
+#sheet = client.open("AppTester").sheet1
+sheet = client.open("MLP ONENOC DUTYCHART").sheet1
 
 # Load raw sheet
 values = sheet.get_all_values()

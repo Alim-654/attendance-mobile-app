@@ -149,7 +149,7 @@ sheet = client.open("MLP ONENOC DUTYCHART").sheet1
 
 
 
-@st.cache_data(ttl=30) 
+@st.cache_data(ttl=20) 
 def load_sheet(_sheet):
     values = _sheet.get_all_values()
     raw_header = values[0]
@@ -533,16 +533,75 @@ st.markdown("""
 # -----------------------------------------------------------------
 
 if individual_index != 0:
-    # A. Individual is selected: Show ONLY the Individual Expander
-    with st.expander("🗓️ **CHOOSE INDIVIDUAL REPORT**", expanded=True):
+    # # A. Individual is selected: Show ONLY the Individual Expander
+    # with st.expander("🗓️ **CHOOSE INDIVIDUAL REPORT**", expanded=True):
+    #     st.selectbox(
+    #         "Individual Selection",
+    #         individual_options,
+    #         index=individual_index,
+    #         key="individual_option",
+    #         label_visibility="collapsed",
+    #         on_change=reset_weekly 
+    #     )
+    # # --- Replacement for the "CHOOSE INDIVIDUAL REPORT" Expander ---
+
+    # Prepare the actual list of names (excluding the default selection)
+    real_names = individual_options[1:]
+
+    with st.expander("🗓️ **CHOOSE INDIVIDUAL REPORT**", expanded=st.session_state.individual_expander_open):
+        
+        # 1️⃣ Search box above dropdown
+        # We use a unique key for the search input
+        search_key = "individual_search_input"
+        search = st.text_input(
+            "Search Individual Name:", 
+            value="", 
+            key=search_key, 
+            label_visibility="collapsed",
+            placeholder="Type to search employee..."
+        )
+
+        # 2️⃣ Filter names based on what user typed
+        if search:
+            # Filter the list of real names
+            filtered_names = [n for n in real_names if search.upper() in n.upper()]
+        else:
+            # If search is empty, show the full list
+            filtered_names = real_names
+            
+        # Always include the default selection for clarity
+        filtered_options = individual_options[0:1] + filtered_names 
+        
+        # Determine the index of the currently selected option in the filtered list
+        current_value = st.session_state.individual_option
+        try:
+            current_index = filtered_options.index(current_value)
+        except ValueError:
+            # If the currently selected name is filtered out, reset to the default
+            current_index = 0
+            st.session_state.individual_option = individual_options[0]
+
+
+        # 3️⃣ Compact dropdown with filtered results
         st.selectbox(
             "Individual Selection",
-            individual_options,
-            index=individual_index,
-            key="individual_option",
+            filtered_options,
+            index=current_index,
+            key="individual_option", # This maintains your existing session state key
             label_visibility="collapsed",
-            on_change=reset_weekly 
+            on_change=reset_weekly # This maintains your existing mutual exclusivity logic
         )
+
+
+
+
+
+
+
+
+
+
+
 
 elif week_index != 0:
     # B. Week is selected: Show ONLY the Weekly Expander

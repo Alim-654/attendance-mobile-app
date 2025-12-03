@@ -106,7 +106,7 @@ client = gspread.authorize(creds)
 #sheet = client.open("AppTester").sheet1
 sheet = client.open("MLP ONENOC DUTYCHART").sheet1
 
-@st.cache_data(ttl=30) 
+@st.cache_data(ttl=60) 
 def load_sheet(_sheet):
     values = _sheet.get_all_values()
     raw_header = values[0]

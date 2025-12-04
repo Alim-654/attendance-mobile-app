@@ -68,7 +68,7 @@ def make_unique(headers):
     return new_headers
 
 code_to_name = {
-    "R": "Rahyanath JTO", "K": "Khamarunnesa JTO", "A": "Alim JTO", "P": "Pradeep JTO", 
+    "R": "Rahyanath JTO", "K": "Khamarunneesa JTO", "A": "Alim JTO", "P": "Pradeep JTO", 
     "SHA": "Shafeeq SDE", "B": "Bahna JTO", "SH": "Shihar JTO", "ST": "Sreejith JTO ",
     "I": "Ilyas SDE", "JM": "Jithush JTO", "JD": "Jimshad JTO", "RK": "Rajesh JTO",
     "RKM": "Riyaz JTO", "AMP": "Abdulla SDE", "N": "Naveen JTO"
@@ -218,19 +218,75 @@ now_ist = datetime.datetime.now(ist)
 today = now_ist.date()
 tomorrow = today + datetime.timedelta(days=1)
 
+import html as _html  # stdlib html.escape
+
 def render_simple_text_block(title, data_df):
     if data_df is None or data_df.empty:
         st.warning(f"{title}: No data available.")
         return
+
     row = data_df.iloc[0]
-    date_str = row["Date"] 
+    date_str = row["Date"]
+
     st.markdown(f"### {title}")
-    st.markdown(f"**Date:** {date_str}\n")
+    st.markdown(f"**{date_str}**")
+
+    # --- color map ---
+    color_map = {
+        "MORNING": "#dceeff",   # soft blue
+        "EVENING": "#ffe6cc",   # soft orange
+        "NIGHT":   "#eadcff",   # soft purple
+        "W-OFF":   "#d9f7d9",   # mint green
+        "LEAVE":   "#ffd6d6",   # light red
+        "GENERAL": "#e6f2ff",   # very soft blue
+        "C-OFF":   "#d6f5f5",   # soft teal (new)
+    }
+
+    # container start
+    st.markdown("<div style='margin-top: 6px;'>", unsafe_allow_html=True)
+
     for col in data_df.columns:
-        if col == "Date" or col == "Date_1": continue
-        value = str(row[col]).strip()
-        if value and value.lower() != "nan": st.markdown(f"**{col}:** {value}")
+        if col == "Date":
+            continue
+
+        raw_val = row[col]
+        # convert to str safely and strip
+        value = "" if raw_val is None else str(raw_val).strip()
+        if not value or value.lower() == "nan":
+            continue
+
+        # escape value so any angle-brackets in data won't break HTML
+        safe_value = _html.escape(value)
+
+        # determine color by column name
+        upper_col = col.upper()
+        color = "#f2f2f2"
+        for key in color_map:
+            if key in upper_col:
+                color = color_map[key]
+                break
+
+        # single clean HTML block per item (use span for label)
+        html = (
+            f"<div style='"
+            f"background: {color};"
+            f"color: black;"
+            f"padding: 8px 10px;"
+            f"border-radius: 6px;"
+            f"margin: 6px 0;"
+            f"font-size: 14px;"
+            f"max-width: 90%;"
+            f"word-wrap: break-word;"
+            f"'>"
+            f"<span style='font-weight:600'>{_html.escape(col)}:</span>&nbsp;{safe_value}"
+            f"</div>"
+        )
+
+        st.markdown(html, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
+
 
 def show_attendance_block(title, date, display_style):
     df_data = get_attendance_for_date(date)
@@ -497,4 +553,5 @@ elif week_index != 0:
 else:
     # C. Show Today/Tomorrow
     show_attendance_block("🗓️ Today's Attendance", today, display_style)
+    st.markdown("<br>", unsafe_allow_html=True)
     show_attendance_block("🗓️ Tomorrow's Attendance", tomorrow, display_style)
